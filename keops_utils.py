@@ -91,8 +91,7 @@ def GenericGaussKernel(ref_scale,list_coefs = [1]):
 
     Returns
     -------
-    labels1 : nparray (n_points)
-        Updated labels of the points1
+    K : kernel -or sum of kernels- funtion.
 
     """
     
@@ -104,8 +103,8 @@ def GenericGaussKernel(ref_scale,list_coefs = [1]):
         ----------
         x,y : torch tensor
             The points x.shape = (n_pts_x, dim) y.shape = (n_pts_y, dim)
-        b (Optional) : list of integers
-            Optional momenta. Default: None 
+        b (Optional) : torch tensor
+            Optional momenta or weights. Default: None 
 
         Returns
         -------
@@ -121,25 +120,25 @@ def GenericGaussKernel(ref_scale,list_coefs = [1]):
 
         D_ij = ((x_i - y_j)**2).sum(dim=2)  # Symbolic (n_pts_x,n_pts_y,1) matrix of squared distances
         
-        ref_scale2 = ref_scale**2
+        ref_scale2 = 1/(ref_scale**2)
 
-        weighting = 1 #1/len(list_coefs)
+        weighting = 1/len(list_coefs)
 
         for i,coef in enumerate(list_coefs):
 
-            c2 = coef**2
+            c2 = coef**2*ref_scale2
             
             if i==0:
-                K_ij =  weighting*(- D_ij*c2/ref_scale2).exp()  # Symbolic (1e6,2e6,1)
+                K_ij =  weighting*(- D_ij*c2).exp()  #  # Symbolic (n_pts_x,n_pts_y,1) matrix
             else:
-                K_ij += weighting*(- D_ij*c2/ref_scale2).exp()  # Symbolic (1e6,2e6,1)
+                K_ij += weighting*(- D_ij*c2).exp()  #  # Symbolic (n_pts_x,n_pts_y,1) matrix
 
         if b is None:
-            a_i = K_ij.sum(dim=1)  # Genuine torch.cuda.FloatTensor, a_i.shape = (1e6, 1),
+            a_i = K_ij.sum(axis=1)
 
         else:
             b =   LazyTensor( b[None,:,:] )    
-            a_i = (K_ij*b).sum_reduction(axis=1)
+            a_i = (K_ij*b).sum(axis=1)
 
         return a_i
 
@@ -161,8 +160,7 @@ def PartialWeightedGaussLinKernel(sigma, epsilon = 0.0001):
 
     Returns
     -------
-    labels1 : nparray (n_points)
-        Updated labels of the points1
+    K : kernel -or sum of kernels- funtion.
 
     """
     
@@ -229,8 +227,7 @@ def PartialWeightedGaussKernel(sigma, epsilon = 0.0001):
 
     Returns
     -------
-    labels1 : nparray (n_points)
-        Updated labels of the points1
+    K : kernel -or sum of kernels- funtion.
 
     """
     
@@ -292,8 +289,7 @@ def PartialWeightedGaussLinKernelOriented(sigma, epsilon = 0.0001):
 
     Returns
     -------
-    labels1 : nparray (n_points)
-        Updated labels of the points1
+    K : kernel -or sum of kernels- funtion.
 
     """
     

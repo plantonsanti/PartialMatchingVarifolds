@@ -41,7 +41,6 @@ def RawRegistration(VS,VT, use_torch = True):
     return decalage
 
 
-
 ####################################################################
 #%% Custom ODE solver, for ODE systems which are defined on tuples
 def RalstonIntegrator(nt=10):

@@ -142,19 +142,15 @@ class SurfacesDataloss():
         
         if self.method == "PartialVarifold": 
             print("Using Partial Varifold")
-            dataloss = self.PartialVarifoldSurface()
+            dataloss = self.PartialVarifold()
     
         elif self.method == "PartialVarifoldLocal": 
-            print("Using Partial Varifold Local version")
-            dataloss = self.PartialVarifoldSurfaceLocal()
+            print("Using Partial Varifold Local (oriented) version")
+            dataloss = self.PartialVarifoldLocal()
     
-        elif self.method == "PartialVarifoldLocal2": 
-            print("Using Partial Varifold Local version 2")
-            dataloss = self.PartialVarifoldLocal2()
-        
-        elif self.method == "PartialVarifoldNormalizedOriented": 
-            print("Using Partial Varifold Local version 2")
-            dataloss = self.PartialVarifoldLocalNormalizedOriented()
+        elif self.method == "PartialVarifoldLocalNormalized": 
+            print("Using Partial Varifold Local Normalized (oriented) version")
+            dataloss = self.PartialVarifoldLocalNormalized()
 
         else:
             if(self.method!="Varifold"):
@@ -166,7 +162,7 @@ class SurfacesDataloss():
     
     
     #%% Varifold datalosses
-    def VarifoldSurface(self):
+    def Varifold(self):
         """
         The default dataloss : Varifold. 
         
@@ -174,7 +170,7 @@ class SurfacesDataloss():
         -------
         @output : loss : the data attachment function.
         """
-        K = GaussLinKernel(sigma=self.sigmaW)
+        K = OrientedGaussLinKernel(sigma=self.sigmaW)
     
         CT, LT, NTn = Compute_structures_surface(self.VT, self.FT_sel)
     
@@ -187,7 +183,7 @@ class SurfacesDataloss():
         return loss
 
 
-    def PartialVarifoldSurface(self):
+    def PartialVarifold(self):
         """
         The Partial Varifold, in its global version. Designed to include the 
         deformed source into the target.  
@@ -196,7 +192,7 @@ class SurfacesDataloss():
         -------
         @output : loss : the data attachment function.
         """
-        K = GaussLinKernel(sigma=self.sigmaW)
+        K = OrientedGaussLinKernel(sigma=self.sigmaW)
     
         CT, LT, NTn = Compute_structures_surface(self.VT, self.FT_sel)
 
@@ -209,7 +205,7 @@ class SurfacesDataloss():
         return loss
     
     
-    def PartialVarifoldSurfaceLocal(self):
+    def PartialVarifoldLocal(self):
         """
         The Partial Varifold, in its local version. Designed to include the 
         deformed source into the target. 
@@ -221,7 +217,7 @@ class SurfacesDataloss():
         def g2(x):
             return (x**2)*(x>0).float()
     
-        K = GaussLinKernel(sigma=self.sigmaW)
+        K = OrientedGaussLinKernel(sigma=self.sigmaW)
     
         CT, LT, NTn = Compute_structures_surface(self.VT, self.FT_sel)
     
@@ -236,43 +232,9 @@ class SurfacesDataloss():
 
             return cost/(self.sigmaW**2) 
         return loss
-    
-
-    def PartialVarifoldLocal2(self):
-        """
-        The Partial Weighted Varifold, in its local version. Designed to include
-        the deformed source into the target. 
-        
-        Returns
-        -------
-        @output : loss : the data attachment function.
-        """
-
-        def g2(x):
-            return (x**2)*(x>0).float()
-
-        K = GaussLinKernel(sigma=self.sigmaW)
-    
-        CT, LT, NTn = Compute_structures_surface(self.VT, self.FT_sel)
-        omega_T = K(CT, CT, NTn, NTn, LT)
-    
-        def far_pen(xs):
-            return 1./(xs+1)
-        
-        WeightedKernel = PartialWeightedGaussLinKernel(sigma=self.sigmaW)
-
-        def loss(VS):
-            CS, LS, NSn = Compute_structures_surface(VS, self.FS_sel)
-
-            omega_S    = K(CS, CS, NSn, NSn, LS)
-            omega_tild = WeightedKernel(CS, CT, NSn, NTn, omega_S, omega_T, LT)
-            
-            cost = ( LS * g2( omega_S - omega_tild )).sum()
-            return cost/(self.sigmaW**2) 
-        return loss
    
 
-    def PartialVarifoldLocalNormalizedOriented(self):
+    def PartialVarifoldLocalNormalized(self):
         """
         The Partial Weighted Varifold, in its local version. Designed to include
         the deformed source into the target. 
