@@ -1,0 +1,1 @@
+{"tensor([10.], device='cuda:0')": "Diffeo Nb Iterations : 217, total time : 102.49", "tensor([5.], device='cuda:0')": "Diffeo Nb Iterations : 220, total time : 98.42"}
