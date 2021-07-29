@@ -41,10 +41,10 @@ def register_structure(template, template_connections,
         
     """
 
-    gamma,factor,sigmaV,sigmaW,max_iter_steps,method = read_parameters(parameters)
+    gamma,sigmaV,sigmaW,max_iter_steps,method = read_parameters(parameters)
     
     print("PARAMETERS : ")
-    print("Gamma : {0}, Factor : {1}, SigmaV : {2}, SigmaW : {3}, max_iter_steps : {4}, method : {5}".format(gamma,factor,sigmaV,sigmaW,max_iter_steps,method))
+    print("Gamma : {0}, SigmaV : {1}, SigmaW : {2}, max_iter_steps : {3}, method : {4}".format(gamma,sigmaV,sigmaW,max_iter_steps,method))
     print()
     resum_optim = {}
 
@@ -56,6 +56,10 @@ def register_structure(template, template_connections,
     try_mkdir(folder_resume_results)
 
     decalage =  RawRegistration(template,target, use_torch=False)  
+
+    np.savez(folder2save+'initial_template.npz', vertices = template, 
+             connections = template_connections, labels = template_labels)
+
 
     #vertices
     template = torch.from_numpy(template).clone().detach().to(dtype=torchdtype, device=torchdeviceId).requires_grad_(True)
@@ -93,7 +97,7 @@ def register_structure(template, template_connections,
 
         resum_optim[str(sigW)]="Diffeo Nb Iterations : "+str(nit)+", total time : "+str(total_time)
 
-        filesavename = 'Scale_'+str(int(tensor_scale))
+        filesavename = 'Scale_'+str(tensor_scale)
 
         qnp_i = deformed_i.detach().cpu().numpy()
 
@@ -102,22 +106,20 @@ def register_structure(template, template_connections,
         
         f = folder2save+'/'+filesavename+'.npz'
         np.savez(f, vertices = qnp_i, connections = template_connections.detach().cpu().numpy(), labels = template_labels)
-        #export_labeled_vtk(qnp_i,template_connections,template_labels,filesavename,folder2save)
 
         p0_np = p0.detach().cpu().numpy()
-
-        np.save(folder2save +'/template_' + filesavename +'.npy', template.detach().cpu().numpy())
         np.save(folder2save +'/Momenta_'+filesavename+'.npy',p0_np)
-        np.save(folder2save +'/'+filesavename+'.npy',qnp_i)
 
     #Save the optimization informations
     with open(folder2save+'/resume_optimization.txt',"w") as f:
         f.write(json.dumps(resum_optim))
     f.close()
 
-    np.save(folder2save+'/target.npy',target.detach().cpu().numpy())
+    np.savez(folder2save+'target.npz', vertices = target.detach().cpu().numpy(), 
+             connections = target_connections.detach().cpu().numpy())
+    
     np.save(folder2save+'/momenta2apply.npy',p0_np) 
-    np.save(folder2save+'/template2apply.npy',template.detach().cpu().numpy()) 
+    np.save(folder2save+'/control_points.npy',template.detach().cpu().numpy()) 
 
     return 0
 
