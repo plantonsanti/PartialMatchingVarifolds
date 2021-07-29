@@ -14,8 +14,8 @@ With the files :
 <strong>Momenta_scale_N.npy</strong>     : the initial momenta to use to reproduce the deformation at the different data attachment scales <strong>N</strong>. 
 <strong>resume_optimization.txt</strong> : the number of iterations and the loss function value at each data attachment scale <strong>N</strong>.  
 
-<strong>control_points.npy</strong>      : the initial momenta to use to reproduce final deformation. 
-<strong>momenta2apply.npy</strong>       : control points for the final deformation.  
+<strong>control_points.npy</strong>      : control points for the final deformation.  
+<strong>momenta2apply.npy</strong>       : the initial momenta to use to reproduce final deformation. 
 
 
 
