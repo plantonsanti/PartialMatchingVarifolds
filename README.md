@@ -2,6 +2,12 @@
 This is the code associated to the paper *Partial Matching in the Space of Varifolds* from *The 27th international conference on Information Processing in Medical Imaging (June, 2021)* (preprint : https://arxiv.org/abs/2103.12441 )
 
 <pre>
+
+Dependancies : 
+- numpy
+- torch
+- pykeops (see : https://www.kernel-operations.io/keops/python/installation.html)
+
 The examples can be run with the scripts :<br/>
 example_surfaces.py 
 example_vascular_trees.py 
