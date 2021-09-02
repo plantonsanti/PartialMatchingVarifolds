@@ -58,7 +58,7 @@ def register_structure(template, template_connections,
     decalage =  RawRegistration(template,target, use_torch=False)  
 
     np.savez(folder2save+'initial_template.npz', vertices = template, 
-             connections = template_connections, labels = template_labels)
+             connections = template_connections)
 
 
     #vertices
@@ -84,7 +84,12 @@ def register_structure(template, template_connections,
 
         ######### Loss to update in both case
         if structure == "Surfaces":
-            dataloss_att = SurfacesDataloss(method, template_connections, target, target_connections, tensor_scale).data_attachment()   
+            if method == 'PartialVarifoldLocalNormalizedRegularized':
+                Instance = SurfacesDataloss(method, template_connections, target, target_connections, tensor_scale, source_vertices = template)  
+                dataloss_att = Instance.data_attachment()   
+            else:
+                dataloss_att = SurfacesDataloss(method, template_connections, target, target_connections, tensor_scale).data_attachment()   
+        
         else:
             dataloss_att = CurvesDataloss(method, template_connections, target, target_connections, tensor_scale).data_attachment()   
 

@@ -56,7 +56,7 @@ accepted_methods = ['Varifold', 'PartialVarifold', 'PartialVarifoldLocal', 'Part
 class SurfacesDataloss():
     
     def __init__(self, method, source_faces, target_vertices, target_faces,
-                 sigmaW, s_faces_selected = None, t_faces_selected = None):
+                 sigmaW, s_faces_selected = None, t_faces_selected = None, source_vertices = None):
         """
         Initialize the dataloss function to compare curves or graph of curves. 
         These parameters are shared by all datalosses.
@@ -101,6 +101,7 @@ class SurfacesDataloss():
         self.FT     = target_faces
         self.FT_sel = t_faces_selected
         self.VT     = target_vertices
+        self.VS     = source_vertices
         
         print(self.FS)
 
@@ -151,6 +152,13 @@ class SurfacesDataloss():
         elif self.method == "PartialVarifoldLocalNormalized": 
             print("Using Partial Varifold Local Normalized (oriented) version")
             dataloss = self.PartialVarifoldLocalNormalized()
+            
+        elif self.method == "PartialVarifoldLocalNormalizedRegularized": 
+            print("Using Partial Varifold Local Normalized Regularized version")
+            K           = GaussLinKernel(sigma=self.sigmaW)
+            CS, LS, NSn = Compute_structures_surface(self.VS, self.FS_sel)
+            w_omega_S0  = LS*(K(CS,CS,NSn, NSn, LS))
+            dataloss    = self.PartialVarifoldLocalNormalizedRegularized(K, w_omega_S0)
 
         else:
             if(self.method!="Varifold"):
@@ -236,12 +244,7 @@ class SurfacesDataloss():
 
     def PartialVarifoldLocalNormalized(self):
         """
-        The Partial Weighted Varifold, in its local version. Designed to include
-        the deformed source into the target. 
         
-        Returns
-        -------
-        @output : loss : the data attachment function.
         """
 
         def g2(x):
@@ -265,4 +268,31 @@ class SurfacesDataloss():
         return loss 
     
     
+    def PartialVarifoldLocalNormalizedRegularized(self, K, w_omega_S0):
+        """
+        The Partial Weighted Normalized and Regularized. Designed to include
+        the deformed source into the target. 
+        
+        Returns
+        -------
+        @output : loss : the data attachment function.
+        """
+    
+        def g2(x):
+            return (x**2)*(x>0).float()
+    
+        WeightedKernel = PartialWeightedGaussLinKernelOriented(sigma=self.sigmaW)
+
+        CT, LT, NTn = Compute_structures_surface(self.VT, self.FT_sel)
+        omega_T = K(CT, CT, NTn, NTn, LT)
+
+        def loss(VS):
+            CS, LS, NSn = Compute_structures_surface(VS, self.FS_sel)
+
+            omega_S    = K(CS, CS, NSn, NSn, LS)
+            omega_tild = WeightedKernel(CS, CT, NSn, NTn, omega_S, omega_T, LT)
+            
+            cost = (LS * g2( omega_S - omega_tild )).sum() + ((w_omega_S0 - LS*omega_S)**2).sum()
+            return cost/(self.sigmaW**2)
+        return loss
    
