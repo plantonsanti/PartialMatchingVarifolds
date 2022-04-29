@@ -7,9 +7,7 @@ Created on Tue Feb 19 11:30:25 2019
 """
 
 import torch
-
-from pykeops.torch import kernel_product, LazyTensor, Genred, Vi, Vj
-from pykeops.torch.kernel_product.formula import *
+from pykeops.torch import LazyTensor, Genred, Vi, Vj
 
 ################### GPU management #########################"
 # torch type and device
