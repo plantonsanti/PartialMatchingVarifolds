@@ -158,7 +158,7 @@ class SurfacesDataloss():
             K           = GaussLinKernel(sigma=self.sigmaW)
             CS, LS, NSn = Compute_structures_surface(self.VS, self.FS_sel)
             w_omega_S0  = LS*(K(CS,CS,NSn, NSn, LS))
-            dataloss    = self.PartialVarifoldLocalNormalizedRegularized(K, w_omega_S0)
+            dataloss    = self.PartialVarifoldLocalNormalizedRegularized(K, w_omega_S0,LS)
 
         else:
             if(self.method!="Varifold"):
@@ -268,7 +268,7 @@ class SurfacesDataloss():
         return loss 
     
     
-    def PartialVarifoldLocalNormalizedRegularized(self, K, w_omega_S0):
+    def PartialVarifoldLocalNormalizedRegularized(self, K, w_omega_S0, LS0):
         """
         The Partial Weighted Normalized and Regularized. Designed to include
         the deformed source into the target. 
@@ -286,13 +286,17 @@ class SurfacesDataloss():
         CT, LT, NTn = Compute_structures_surface(self.VT, self.FT_sel)
         omega_T = K(CT, CT, NTn, NTn, LT)
 
+        norm_S0 = w_omega_S0.sum()
         def loss(VS):
             CS, LS, NSn = Compute_structures_surface(VS, self.FS_sel)
 
             omega_S    = K(CS, CS, NSn, NSn, LS)
             omega_tild = WeightedKernel(CS, CT, NSn, NTn, omega_S, omega_T, LT)
             
-            cost = (LS * g2( omega_S - omega_tild )).sum() + ((w_omega_S0 - LS*omega_S)**2).sum()
+            regularization = ((w_omega_S0 - LS*(LS/LS0)*omega_S)**2).sum() #Local
+            #regularization = (norm_S0 - (LS*omega_S).sum())**2 #Global
+            
+            cost = (LS * g2( omega_S - omega_tild )).sum() + 1.0*regularization
             return cost/(self.sigmaW**2)
         return loss
    

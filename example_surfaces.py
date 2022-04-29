@@ -24,15 +24,15 @@ method         -> the data attachment method, possible keywords:
 """
 
 parameters = {
-    "gamma": 10000,
-    "sigmaV": 100,
+    "gamma": 10000000,
+    "sigmaV": 50,
     "sigmaW": [
         10,
         5
     ],
     "max_iter_steps": [
-        100,
-        500
+        200,
+        200
     ],
     "method": "PartialVarifoldLocalNormalizedRegularized" # "Varifold" # 
 }
