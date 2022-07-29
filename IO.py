@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import json
 import os
 import torch
 import numpy as np
@@ -60,20 +59,16 @@ def read_parameters(parameters = {}):
         gamma = parameters["gamma"]
     else:
         gamma = torch.tensor([default_parameters["gamma"]], dtype=torchdtype, device=torchdeviceId)
-    if("factor" in parameters.keys()):
-        factor = parameters["factor"]
-    else:
-        factor = default_parameters["factor"]
     if("sigmaV" in parameters.keys()):
-        scaleV = factor*parameters["sigmaV"]
+        scaleV = parameters["sigmaV"]
     else:
-        scaleV = factor*default_parameters["sigmaV"]
+        scaleV = default_parameters["sigmaV"]
     sigmaV = torch.tensor([scaleV], dtype=torchdtype, device=torchdeviceId)
     
     if("sigmaW" in parameters.keys()):
-        sigmaW = [factor*torch.tensor([sigW], dtype=torchdtype, device=torchdeviceId) for sigW in parameters["sigmaW"]]
+        sigmaW = [torch.tensor([sigW], dtype=torchdtype, device=torchdeviceId) for sigW in parameters["sigmaW"]]
     else:
-        sigmaW = [factor*torch.tensor([sigW], dtype=torchdtype, device=torchdeviceId) for sigW in default_parameters["sigmaW"]]
+        sigmaW = [torch.tensor([sigW], dtype=torchdtype, device=torchdeviceId) for sigW in default_parameters["sigmaW"]]
     
     if("max_iter_steps" in parameters.keys()):
         max_iter_steps = parameters["max_iter_steps"]
@@ -86,13 +81,8 @@ def read_parameters(parameters = {}):
         method = parameters["method"]
     else:
         method = default_parameters["method"]
-    
-    if("template" in parameters.keys()):
-        use_template=parameters["template"]
-    else:
-        use_template=default_parameters["template"]
 
-    return gamma,factor,sigmaV,sigmaW,max_iter_steps,method,use_template
+    return gamma, sigmaV, sigmaW, max_iter_steps, method
 
 
 

@@ -300,7 +300,7 @@ class CurvesDataloss():
         """
         
 
-        elif self.method == "PartialVarifold": 
+        if self.method == "PartialVarifold": 
             print("Using Partial Varifold")
             dataloss = self.PartialVarifoldCurve()
     
@@ -332,12 +332,12 @@ class CurvesDataloss():
         """
         K = GaussLinKernel(sigma=self.sigmaW)
     
-        CT, LT, NTn = Compute_structures(self.VT, self.FT_sel)
+        CT, LT, NTn = Compute_structures_curve(self.VT, self.FT_sel)
     
         cst = (LT * K(CT, CT, NTn, NTn, LT)).sum()
         
         def loss(VS):
-            CS, LS, NSn = Compute_structures(VS, self.FS_sel)
+            CS, LS, NSn = Compute_structures_curve(VS, self.FS_sel)
             cost = 10*np.pi**2/4*(cst + (LS * K(CS, CS, NSn, NSn, LS)).sum() - 2 * (LS * K(CS, CT, NSn, NTn, LT)).sum())
             return cost/(self.sigmaW**2)
         return loss
@@ -353,10 +353,10 @@ class CurvesDataloss():
         @output : loss : the data attachment function.
         """
         K = GaussLinKernel(sigma=self.sigmaW)
-        CT, LT, NTn = Compute_structures(self.VT, self.FT_sel)
+        CT, LT, NTn = Compute_structures_curve(self.VT, self.FT_sel)
         
         def loss(VS):
-            CS, LS, NSn = Compute_structures(VS, self.FS_sel)
+            CS, LS, NSn = Compute_structures_curve(VS, self.FS_sel)
             cross = (LS * K(CS, CT, NSn, NTn, LT)).sum()
     
             cost_S = (LS * K(CS, CS, NSn, NSn, LS)).sum() - cross
@@ -378,10 +378,10 @@ class CurvesDataloss():
     
         K = GaussLinKernel(sigma=self.sigmaW)
 
-        CT, LT, NTn = Compute_structures(self.VT, self.FT_sel)
+        CT, LT, NTn = Compute_structures_curve(self.VT, self.FT_sel)
     
         def loss(VS):
-            CS, LS, NSn = Compute_structures(VS, self.FS_sel)
+            CS, LS, NSn = Compute_structures_curve(VS, self.FS_sel)
             xs = K(CS, CT, NSn, NTn, LT)
             cost = ( LS * g2( K(CS, CS, NSn, NSn, LS) - xs )).sum() 
             return cost/(self.sigmaW**2) 
@@ -405,14 +405,14 @@ class CurvesDataloss():
     
         WeightedKernel = PartialWeightedGaussLinKernel(sigma=self.sigmaW)
 
-        CT, LT, NTn = Compute_structures(self.VT, self.FT_sel)
+        CT, LT, NTn = Compute_structures_curve(self.VT, self.FT_sel)
         omega_T = K(CT, CT, NTn, NTn, LT)
     
         def far_pen(xs):
             return 1./(xs+1)
         
         def loss(VS):
-            CS, LS, NSn = Compute_structures(VS, self.FS_sel)
+            CS, LS, NSn = Compute_structures_curve(VS, self.FS_sel)
 
             omega_S    = K(CS, CS, NSn, NSn, LS)
             omega_tild = WeightedKernel(CS, CT, NSn, NTn, omega_S, omega_T, LT)
