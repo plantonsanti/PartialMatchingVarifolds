@@ -61,6 +61,6 @@ F_target_np = np.load(path_target, allow_pickle=True)['connections'].astype(dtyp
 
 register_structure(V_template_np, F_template_np, 
                    V_target_np, F_target_np, 
-                   folder2save, parameters=parameters, structure='Curves', reg_root = True)
+                   folder2save, parameters=parameters, structure='curves', reg_root = True)
 
 

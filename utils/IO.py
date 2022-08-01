@@ -27,13 +27,12 @@ def try_mkdir(path):
     
 
 default_parameters = { 
-                        "gamma" : 0.1,
+                        "gamma" : 1,
                         "factor" : 1,
-                        "sigmaV" : 100,
-                        "sigmaW" : [100,25],
-                        "max_iter_steps" : [100,500],
-                        "method" : "ConstantNormalCycle",
-                        "template" : False
+                        "sigmaV" : 50,
+                        "sigmaW" : [50,25,5],
+                        "max_iter_steps" : [100,100,200],
+                        "method" : "Varifold",
                      }
 
 
@@ -51,9 +50,7 @@ def read_parameters(parameters = {}):
                                     - sigmaV  : float  : scale of the diffeomorphism.
                                     - sigmaW  : list of float : the different scales of the data attachment term. 
                                     - max_iter_steps : list of integers : must be same size as sigmaW, the number of iteration 
-                                                                          per data attachment scale. 
-                                    - template : boolean : if we want to build a template from the registration to all the targets. 
-                                    
+                                                                          per data attachment scale.                                     
     """
 
     #If default parameters are used, read them

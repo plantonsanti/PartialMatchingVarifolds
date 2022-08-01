@@ -29,7 +29,7 @@ method         -> the data attachment method, possible keywords:
 """
 
 parameters = {
-    "gamma": 10000000,
+    "gamma": 10000,
     "sigmaV": 50,
     "sigmaW": [
         10,
@@ -39,7 +39,7 @@ parameters = {
         200,
         200
     ],
-    "method": "PartialVarifoldLocalNormalizedRegularized" # "Varifold" # 
+    "method": "PartialVarifoldLocalNormalized_Regulocal" # "Varifold" # 
 }
 
 
@@ -58,7 +58,7 @@ F_CT_np = np.load(path_CT, allow_pickle=True)[0]['cells'].astype(dtype = 'int32'
 #V_CT_np, F_CT_np = RemoveDuplicates(V_CT_np,F_CT_np)
 
 register_structure(V_CBCT_np, F_CBCT_np, V_CT_np, F_CT_np, folder2save, parameters=parameters,
-                        structure = "Surfaces")
+                        structure = "surfaces")
 
 
 

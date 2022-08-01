@@ -8,26 +8,22 @@ sys.path.append(os.path.abspath("../registration"))
 
 import optimization
 
-from IO                                    import *
-from registration                          import *
-from keops_utils                           import *
+from IO               import *
+from registration     import *
+from keops_utils      import *
 
-from data_attachment_surfaces              import SurfacesDataloss
-from data_attachment_curves                import CurvesDataloss
+from data_attachment  import DatalossClass
 
 import torch
 import numpy as np
 import json
-
-# Cuda management
-use_cuda,torchdeviceId,torchdtype,KeOpsdeviceId,KeOpsdtype,KernelMethod = TestCuda()
 
 
 def register_structure(template, template_connections,
                         target, target_connections,
                         folder2save,
                         parameters={"default" : True},
-                        structure = "Surfaces", reg_root = False):
+                        structure = None, initial_registration = 0, oriented = False):
     """
     Perform the registration of a source onto a target with an initialization as barycenter registration.
     
@@ -45,6 +41,9 @@ def register_structure(template, template_connections,
         
     """
 
+    # Cuda management
+    use_cuda,torchdeviceId,torchdtype,KeOpsdeviceId,KeOpsdtype,KernelMethod = TestCuda()
+
     gamma,sigmaV,sigmaW,max_iter_steps,method = read_parameters(parameters)
     
     print("PARAMETERS : ")
@@ -59,9 +58,10 @@ def register_structure(template, template_connections,
     folder_resume_results = folder2save+'/dict_resume_opt/'
     try_mkdir(folder_resume_results)
 
-    if reg_root:
+
+    if initial_registration == 2:
         decalage =  RegisterRoot(template,target) 
-    else:
+    elif initial_registration == 1:
         decalage =  RawRegistration(template,target, use_torch=False)  
 
     np.savez(folder2save+'initial_template.npz', vertices = template, 
@@ -75,7 +75,7 @@ def register_structure(template, template_connections,
     template_connections = torch.from_numpy(template_connections).detach().to(dtype=torch.long, device=torchdeviceId)
     target_connections = torch.from_numpy(target_connections).detach().to(dtype=torch.long, device=torchdeviceId)
     
-    #The kernel deformation definition
+    #The kernel deformation definition (Sum of gaussian kernels at 4 different scales)
     Kv = Sum4GaussKernel(sigma=sigmaV)
 
     #Initial Momenta : the optimization variables
@@ -89,16 +89,12 @@ def register_structure(template, template_connections,
         print("Scale : ", sigW)
         tensor_scale = sigW
 
-        ######### Loss to update in both case
-        if structure == "Surfaces":
-            if method == 'PartialVarifoldLocalNormalizedRegularized':
-                Instance = SurfacesDataloss(method, template_connections, target, target_connections, tensor_scale, source_vertices = template)  
-                dataloss_att = Instance.data_attachment()   
-            else:
-                dataloss_att = SurfacesDataloss(method, template_connections, target, target_connections, tensor_scale).data_attachment()   
-        
-        else:
-            dataloss_att = CurvesDataloss(method, template_connections, target, target_connections, tensor_scale).data_attachment()   
+        ######### Data loss to compute at each diffeomorphic shooting
+        Instance = DatalossClass(method, template_connections, 
+                                    target, target_connections, 
+                                    tensor_scale, 
+                                    source_vertices = template, structure = structure, oriented=oriented)  
+        dataloss_att = Instance.data_attachment()   
 
         ######### The diffeo part
         loss = LDDMMloss(Kv,dataloss_att,sigmaV, gamma=gamma)
@@ -107,9 +103,10 @@ def register_structure(template, template_connections,
         p0,nit,total_time = optimization.opt(loss, p0, template, max_iter_steps[j], folder_resume_results, dict_opt_name)
         p_i,deformed_i = Shooting(p0, template, Kv)
 
+        ######### Saving the results 
         resum_optim[str(sigW)]="Diffeo Nb Iterations : "+str(nit)+", total time : "+str(total_time)
 
-        filesavename = 'Scale_'+str(tensor_scale)
+        filesavename = 'Scale_'+str(float(tensor_scale.detach().cpu().numpy()))
 
         qnp_i = deformed_i.detach().cpu().numpy()
 
@@ -135,4 +132,65 @@ def register_structure(template, template_connections,
 
     return 0
 
+
+
+
+import argparse
+
+def main():
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("path_to_source", help="path to the source file, that should be a .npz file containing the points (key 'points'), and their connections (key 'connections').",
+                        type=str)
+    parser.add_argument("path_to_target", help="path to the target file, that should be a .npz file containing the points (key 'points'), and their connections (key 'connections').",
+                        type=str)
+    parser.add_argument("path_to_save", help="path to folder in which to save the results.",
+                        type=str)
+    parser.add_argument("-o", "--oriented", action="store_true", help="use oriented shapes", default=0)
+    parser.add_argument("-p", "--parameters", type=str, help="path to config file, a .json containing the LDDMM parameters", default="empty")
+    parser.add_argument("-i", "--initial_registration", type=int, choices=[0, 1, 2], 
+                        help="(Default) 0: no initial registration \n 1: register the centers of mass \n 2: register the first points", 
+                        default=0)
+    parser.add_argument("-s", "--structure", type=str, choices=["curves", "surfaces"], 
+                        help="The structure of the shapes to align. If None, the structure will be deduced from the connections of the vertices.", 
+                        default=None)
+    
+    args = parser.parse_args()
+    
+    V_template_np = np.load(args.path_to_source, allow_pickle=True)['points']
+    F_template_np = np.load(args.path_to_source, allow_pickle=True)['connections'].astype(dtype = 'int32')             
+
+    V_target_np = np.load(args.path_to_target, allow_pickle=True)['points']
+    F_target_np = np.load(args.path_to_target, allow_pickle=True)['connections'].astype(dtype = 'int32')
+    
+    if args.oriented:
+        print("Using oriented shapes")
+        
+    if args.parameters != "empty" :
+        with open(args.parameters,'r') as json_file:
+            parameters = json.load(json_file) 
+    else:
+        parameters={"default" : True}
+
+    args.initial_registration
+    if args.initial_registration == 1:
+        print("Initial registration of centers of masses")
+    elif args.initial_registration == 2:
+        print("Initial registration of first points")
+        
+    register_structure(V_template_np, F_template_np,
+                        V_target_np, F_target_np,
+                        args.path_to_save,
+                        parameters=parameters,
+                        structure = args.structure, initial_registration = args.initial_registration, oriented = args.oriented)
+        
+    """argc = len(argv)
+    
+    if argc < 2:
+        print("At least two arguments expected: 'path-to-source' and 'path-to-target'. ")
+    
+    print("Hello World!")"""
+
+if __name__ == "__main__":
+    main()
 
