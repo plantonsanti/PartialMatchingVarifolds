@@ -46,15 +46,21 @@ parameters = {
 folder2save = '../results/surfaces/'
 try_mkdir(folder2save)  
 
-path_CBCT  = common+'/CBCT.npy'
-path_CT    = common+'/CT.npy'
+path_CBCT  = common+'/CBCT.npz'
+path_CT    = common+'/CT.npz'
 
-V_CBCT_np = np.load(path_CBCT, allow_pickle=True)[0]['points']
-F_CBCT_np = np.load(path_CBCT, allow_pickle=True)[0]['cells'].astype(dtype = 'int32')             
+V_CBCT_np = np.load(path_CBCT, allow_pickle=True)['points']
+F_CBCT_np = np.load(path_CBCT, allow_pickle=True)['connections'].astype(dtype = 'int32')             
 #V_CBCT_np, F_CBCT_np =  RemoveDuplicates(V_CBCT_np,F_CBCT_np)
 
-V_CT_np = np.load(path_CT, allow_pickle=True)[0]['points']
-F_CT_np = np.load(path_CT, allow_pickle=True)[0]['cells'].astype(dtype = 'int32')
+V_CT_np = np.load(path_CT, allow_pickle=True)['points']
+F_CT_np = np.load(path_CT, allow_pickle=True)['connections'].astype(dtype = 'int32')
+
+np.savez(common+'/CBCT.npz', points = V_CBCT_np, 
+             connections = F_CBCT_np)
+np.savez(common+'CT.npz', points = V_CT_np, 
+             connections = F_CT_np)
+
 #V_CT_np, F_CT_np = RemoveDuplicates(V_CT_np,F_CT_np)
 
 register_structure(V_CBCT_np, F_CBCT_np, V_CT_np, F_CT_np, folder2save, parameters=parameters,
