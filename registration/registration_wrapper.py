@@ -178,19 +178,16 @@ def main():
     elif args.initial_registration == 2:
         print("Initial registration of first points")
         
-    register_structure(V_template_np, F_template_np,
-                        V_target_np, F_target_np,
-                        args.path_to_save,
-                        parameters=parameters,
-                        structure = args.structure, initial_registration = args.initial_registration, oriented = args.oriented)
-        
-    """argc = len(argv)
-    
-    if argc < 2:
-        print("At least two arguments expected: 'path-to-source' and 'path-to-target'. ")
-    
-    print("Hello World!")"""
+    out = register_structure(V_template_np, F_template_np,
+                             V_target_np, F_target_np,
+                             args.path_to_save,
+                             parameters=parameters,
+                             structure = args.structure, 
+                             initial_registration = args.initial_registration, 
+                             oriented = args.oriented)
+
+    return out
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
 
