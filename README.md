@@ -9,8 +9,8 @@ Dependancies :
 - pykeops (see : https://www.kernel-operations.io/keops/python/installation.html)
 
 The examples can be run with the scripts :<br/>
-example_surfaces.py 
-example_vascular_trees.py 
+examples/example_surfaces.py 
+examples/example_vascular_trees.py 
 
 Each example save the results in /results/surfaces 
                                          /vascular_trees 
