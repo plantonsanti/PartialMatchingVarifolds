@@ -5,7 +5,6 @@ import os
 import torch
 import numpy as np
 
-import sys 
 import os
 from keops_utils import TestCuda
 
