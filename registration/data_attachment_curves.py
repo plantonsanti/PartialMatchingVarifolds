@@ -6,6 +6,11 @@ Created on Tue Feb 19 11:30:25 2019
 @author: pantonsanti
 """
 
+
+import sys 
+import os
+sys.path.append(os.path.abspath("../utils"))
+
 import torch
 from torch.autograd import Variable
 import numpy as np

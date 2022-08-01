@@ -6,8 +6,13 @@ Created on Tue Feb 19 11:30:25 2019
 @author: pantonsanti
 """
 
-# Standard imports
+import sys 
+import os
+sys.path.append(os.path.abspath("../utils"))
+
 from keops_utils import TestCuda
+
+# Standard imports
 import torch
 from torch.autograd import grad
 import numpy as np
@@ -19,7 +24,7 @@ use_cuda,torchdeviceId,torchdtype,KeOpsdeviceId,KeOpsdtype,KernelMethod = TestCu
 def RawRegistration(VS,VT, use_torch = True):
     """
     A simple registration of the barycenters.
-    Translate the source. 
+    Translate the source vertices VS. 
 
     @param : VS : (n_source x dim) torch tensor, the source vertices (that are translated in the procedure)
     @param : VT : (n_target x dim) torch tensor, the target vertices
@@ -40,6 +45,25 @@ def RawRegistration(VS,VT, use_torch = True):
 
     return decalage
 
+
+# Root registration
+def RegisterRoot(VS,VT):
+    """
+    A simple registration of the first points in the trees.
+    Translate the source vertices VS. 
+
+    @param : VS : (n_source x dim) torch tensor, the source vertices (that are translated in the procedure)
+    @param : VT : (n_target x dim) torch tensor, the target vertices
+
+    @output : decalage : (1 x dim) torch tensor, the translation applied along each axis.  
+    """
+
+    decalage = VS[0,:] - VT[0,:]
+
+    for k in range(VS.shape[0]):
+        VS[k,:]+=decalage
+
+    return decalage
 
 ####################################################################
 #%% Custom ODE solver, for ODE systems which are defined on tuples

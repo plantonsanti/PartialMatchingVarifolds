@@ -5,6 +5,8 @@ import os
 import torch
 import numpy as np
 
+import sys 
+import os
 from keops_utils import TestCuda
 
 use_cuda,torchdeviceId,torchdtype,KeOpsdeviceId,KeOpsdtype,KernelMethod = TestCuda(verbose=False)
@@ -25,7 +27,7 @@ def try_mkdir(path):
     return r
     
 
-default_parameters = {  "default" : True,
+default_parameters = { 
                         "gamma" : 0.1,
                         "factor" : 1,
                         "sigmaV" : 100,
@@ -54,6 +56,13 @@ def read_parameters(parameters = {}):
                                     - template : boolean : if we want to build a template from the registration to all the targets. 
                                     
     """
+
+    #If default parameters are used, read them
+    if("default" in parameters.keys()):
+        default = parameters["default"]
+        if default:
+            print("Reading default parameters for LDDMM settings")
+            return read_parameters(default_parameters)
 
     if("gamma" in parameters.keys()):
         gamma = parameters["gamma"]

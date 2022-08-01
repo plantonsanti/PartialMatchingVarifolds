@@ -2,18 +2,22 @@
 # -*- coding: utf-8 -*-
 
 import os
-import torch
-import time
+import sys 
+sys.path.append(os.path.abspath("../utils"))
+sys.path.append(os.path.abspath("../registration"))
+
 import optimization
+
+from IO                                    import *
+from registration                          import *
+from keops_utils                           import *
+
+from data_attachment_surfaces              import SurfacesDataloss
+from data_attachment_curves                import CurvesDataloss
+
+import torch
 import numpy as np
 import json
-
-from IO                           import *
-from registration                 import *
-from keops_utils                  import *
-
-from data_attachment_surfaces import SurfacesDataloss
-from data_attachment_curves   import CurvesDataloss
 
 # Cuda management
 use_cuda,torchdeviceId,torchdtype,KeOpsdeviceId,KeOpsdtype,KernelMethod = TestCuda()
@@ -23,7 +27,7 @@ def register_structure(template, template_connections,
                         target, target_connections,
                         folder2save,
                         parameters={"default" : True},
-                        structure = "Surfaces"):
+                        structure = "Surfaces", reg_root = False):
     """
     Perform the registration of a source onto a target with an initialization as barycenter registration.
     
@@ -55,7 +59,10 @@ def register_structure(template, template_connections,
     folder_resume_results = folder2save+'/dict_resume_opt/'
     try_mkdir(folder_resume_results)
 
-    decalage =  RawRegistration(template,target, use_torch=False)  
+    if reg_root:
+        decalage =  RegisterRoot(template,target) 
+    else:
+        decalage =  RawRegistration(template,target, use_torch=False)  
 
     np.savez(folder2save+'initial_template.npz', vertices = template, 
              connections = template_connections)
