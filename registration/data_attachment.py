@@ -309,7 +309,7 @@ class DatalossClass():
                 print("Target connections is (n,2), using curves structure")
                 self.structure = "curves"
             elif target_connections.shape[1] == 3:
-                print("Target connections is (n,2), using curves structure")
+                print("Target connections is (n,3), using surfaces structure")
                 self.structure = "surfaces"
             else:
                 print("structure parameter was None, trying to read data but unrecognized target connections shape (should either be (n,2) or (n,3)).")

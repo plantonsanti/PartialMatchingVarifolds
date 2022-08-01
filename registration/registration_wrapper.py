@@ -74,7 +74,7 @@ def register_structure(template, template_connections,
     #faces
     template_connections = torch.from_numpy(template_connections).detach().to(dtype=torch.long, device=torchdeviceId)
     target_connections = torch.from_numpy(target_connections).detach().to(dtype=torch.long, device=torchdeviceId)
-    
+        
     #The kernel deformation definition (Sum of gaussian kernels at 4 different scales)
     Kv = Sum4GaussKernel(sigma=sigmaV)
 
@@ -114,7 +114,7 @@ def register_structure(template, template_connections,
         template_labels = np.ones(qnp_i.shape[0])
         
         f = folder2save+'/'+filesavename+'.npz'
-        np.savez(f, vertices = qnp_i, connections = template_connections.detach().cpu().numpy(), labels = template_labels)
+        np.savez(f, points = qnp_i, connections = template_connections.detach().cpu().numpy(), labels = template_labels)
 
         p0_np = p0.detach().cpu().numpy()
         np.save(folder2save +'/Momenta_'+filesavename+'.npy',p0_np)
@@ -124,7 +124,7 @@ def register_structure(template, template_connections,
         f.write(json.dumps(resum_optim))
     f.close()
 
-    np.savez(folder2save+'target.npz', vertices = target.detach().cpu().numpy(), 
+    np.savez(folder2save+'target.npz', points = target.detach().cpu().numpy(), 
              connections = target_connections.detach().cpu().numpy())
     
     np.save(folder2save+'/momenta2apply.npy',p0_np) 
