@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+
+import sys 
+import os
+sys.path.append(os.path.abspath("../utils"))
+sys.path.append(os.path.abspath("../registration"))
+
 import numpy as np
 
 from IO                           import *
 from registration_wrapper         import register_structure
 
-
-common = './data/trees/'
 
 """
 The paramters of the registration :
@@ -24,24 +28,24 @@ method         -> the data attachment method, possible keywords:
 
 parameters = {
     "Default": 0,
-    "gamma": 10,
+    "gamma": 1,
     "factor": 1,
-    "sigmaV": 100,
+    "sigmaV": 50,
     "sigmaW": [
-        20,
-        10,
+        50,
+        25,
         5
     ],
     "max_iter_steps": [
-        1000,
-        1000,
-        1000
+        100,
+        100,
+        200
     ],
     "method": "Varifold" # "PartialVarifoldLocalNormalized" # 
 }
 
-
-folder2save = './results/vascular_trees/'
+common = '../data/trees/'
+folder2save = '../results/vascular_trees/'
 try_mkdir(folder2save)  
 
 path_template  = common+'/template.npz'
@@ -57,6 +61,6 @@ F_target_np = np.load(path_target, allow_pickle=True)['connections'].astype(dtyp
 
 register_structure(V_template_np, F_template_np, 
                    V_target_np, F_target_np, 
-                   folder2save, parameters=parameters, structure='Curves')
+                   folder2save, parameters=parameters, structure='Curves', reg_root = True)
 
 

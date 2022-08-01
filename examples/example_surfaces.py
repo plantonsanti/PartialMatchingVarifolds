@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import sys 
+import os
+sys.path.append(os.path.abspath("../utils"))
+sys.path.append(os.path.abspath("../registration"))
+
 import numpy as np
 
 from IO                           import *
 from registration_wrapper         import register_structure
 
 
-common = './data/surfaces/'
+common = '../data/surfaces/'
 
 """
 The paramters of the registration :
@@ -38,7 +43,7 @@ parameters = {
 }
 
 
-folder2save = './results/surfaces/'
+folder2save = '../results/surfaces/'
 try_mkdir(folder2save)  
 
 path_CBCT  = common+'/CBCT.npy'

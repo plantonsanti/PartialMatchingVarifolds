@@ -68,7 +68,7 @@ def OrientedGaussLinKernel(sigma):
 
 
 def SobolevKernel():
-
+    x, y = Vi(0,3), Vj(1,3)
     D2 = x.sqdist(y)
     K = D2.pow(3/2)
     return (K).sum_reduction(axis=1)
