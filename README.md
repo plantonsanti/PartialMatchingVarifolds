@@ -28,7 +28,7 @@ With the files :
 
 
 The registration of a template shape onto a target (results saved in a given path) can be done with command line:
-python registration_wrapper.py path/to/template.npz path/to/target.npz path/to/results/ 
+python ./registration/registration_wrapper.py path/to/template.npz path/to/target.npz path/to/results/ 
 
 Additional options informations are provided with 'python registration_wrapper.py -h'
 
