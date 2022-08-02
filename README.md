@@ -8,7 +8,7 @@ Dependancies :
 - torch
 - pykeops (see : https://www.kernel-operations.io/keops/python/installation.html)
 
-a working environment can be installed via conda using:
+a working environment can be installed (on linux) via conda using:
 conda env create -n pv_env -f working_environment.yml
 
 The examples can be run with the scripts :<br/>
