@@ -3,8 +3,12 @@
 
 import os
 import sys 
-sys.path.append(os.path.abspath("../utils"))
-sys.path.append(os.path.abspath("../registration"))
+
+
+current_path = os.path.dirname(__file__)
+
+sys.path.append(os.path.abspath(current_path + "/../utils"))
+sys.path.append(os.path.abspath(current_path + "/../registration"))
 
 import optimization
 
